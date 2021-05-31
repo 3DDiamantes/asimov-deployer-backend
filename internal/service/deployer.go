@@ -3,6 +3,7 @@ package service
 import (
 	"asimov-deployer-backend/internal/domain"
 	"asimov-deployer-backend/internal/repository"
+	"os"
 )
 
 type DeployerService interface {
@@ -28,15 +29,29 @@ func (s *deployerService) Deploy(body domain.DeployBody) error {
 		return err
 	}
 
+	tmpDir, err := os.MkdirTemp("", "asimov-deployer-*")
+	if err != nil {
+		return err
+	}
+
 	for _, asset := range release.Assets {
 		if asset.Name == body.Tag {
-			s.ghRepo.DownloadAsset(body.Owner, body.Repo, body.Tag, asset.Name)
+			err = s.ghRepo.DownloadAsset(body.Owner, body.Repo, asset.ID, asset.Name, tmpDir)
+			if err != nil {
+				return err
+			}
 			break
 		}
 	}
 
 	// Move the asset to the scope folder
-	s.fsRepo.Move(body.Scope)
+	s.fsRepo.Move(tmpDir, body.Tag, body.Scope)
+
+	// Delete the temp folder
+	err = os.RemoveAll(tmpDir)
+	if err != nil {
+		return err
+	}
 
 	// Run the binary
 	s.fsRepo.Run(body.Scope, body.Tag)

@@ -28,8 +28,15 @@ func (c *deployerController) Deploy(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.String(http.StatusBadRequest, "Invalid body.")
+		return
 	}
 
-	c.svc.Deploy(body)
+	err = c.svc.Deploy(body)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
 	ctx.String(http.StatusOK, "Deployed correctly.")
 }

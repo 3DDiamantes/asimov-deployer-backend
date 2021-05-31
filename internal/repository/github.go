@@ -13,7 +13,7 @@ import (
 )
 
 type GithubRepository interface {
-	DownloadAsset(owner string, repo string, tag string, path string) error
+	DownloadAsset(owner string, repo string, assetID uint64, filename string, path string) error
 	GetReleaseByTag(owner string, repo string, tag string) (*domain.GithubGetReleaseByTagResponse, error)
 }
 
@@ -29,7 +29,7 @@ func NewGithubRepository(rc *resty.Client) GithubRepository {
 
 func (r *githubRepository) GetReleaseByTag(owner string, repo string, tag string) (*domain.GithubGetReleaseByTagResponse, error) {
 	resp, err := r.rc.R().
-		SetAuthToken(defines.GithubToken).
+		SetHeader("Authorization", "bearer "+defines.GithubToken).
 		SetHeader("Accept", "application/vnd.github.v3+json").
 		SetPathParam(defines.GithubPathParamOwner, owner).
 		SetPathParam(defines.GithubPathParamRepository, repo).
@@ -50,9 +50,9 @@ func (r *githubRepository) GetReleaseByTag(owner string, repo string, tag string
 	return &githubGetReleaseByTagResponse, nil
 }
 
-func (r *githubRepository) DownloadAsset(owner string, repo string, assetID string, filename string) error {
+func (r *githubRepository) DownloadAsset(owner string, repo string, assetID uint64, filename string, path string) error {
 	// Descarga la el binario de la nueva versión
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/repos/%s/%s/releases/assets/%s", owner, repo, assetID), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/repos/%s/%s/releases/assets/%d", defines.GithubURLBase, owner, repo, assetID), nil)
 	req.Header.Set("Accept", "application/octet-stream")
 	req.Header.Set("Authorization", "bearer "+defines.GithubToken)
 	client := http.Client{}
@@ -63,7 +63,7 @@ func (r *githubRepository) DownloadAsset(owner string, repo string, assetID stri
 	defer resp.Body.Close()
 
 	// Crea el archivo
-	out, err := os.Create(filename)
+	out, err := os.Create(path + "/" + filename)
 	if err != nil {
 		return err
 	}

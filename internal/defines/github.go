@@ -9,6 +9,6 @@ const (
 	GithubPathParamAssetID    = "asset_id"
 	GithubPathParamTag        = "tag"
 
-	GithubURLGetReleaseAsset = "/repos/{" + GithubPathParamOwner + "}/{" + GithubPathParamRepository + "}/releases/assets/{" + GithubPathParamAssetID + "}"
-	GithubURLGetReleaseByTag = "/repos/{" + GithubPathParamOwner + "}/{" + GithubPathParamRepository + "}/releases/tags/{" + GithubPathParamTag + "}"
+	GithubURLGetReleaseAsset = GithubURLBase + "/repos/{" + GithubPathParamOwner + "}/{" + GithubPathParamRepository + "}/releases/assets/{" + GithubPathParamAssetID + "}"
+	GithubURLGetReleaseByTag = GithubURLBase + "/repos/{" + GithubPathParamOwner + "}/{" + GithubPathParamRepository + "}/releases/tags/{" + GithubPathParamTag + "}"
 )

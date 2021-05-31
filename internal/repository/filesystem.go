@@ -1,8 +1,8 @@
 package repository
 
 type FilesystemRepository interface {
-	Move(path string)
-	Run(path string, app string)
+	Move(fromPath string, toPath string, filename string)
+	Run(path string, filename string)
 }
 
 type filesystemRepository struct {
@@ -12,9 +12,9 @@ func NewFilesystemRepository() FilesystemRepository {
 	return &filesystemRepository{}
 }
 
-func (r *filesystemRepository) Move(path string) {
+func (r *filesystemRepository) Move(fromPath string, toPath string, filename string) {
 
 }
-func (r *filesystemRepository) Run(path string, app string) {
+func (r *filesystemRepository) Run(path string, filename string) {
 
 }
