@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-resty/resty/v2"
 )
 
 func InitRouter() *gin.Engine {
@@ -18,8 +19,10 @@ func InitRouter() *gin.Engine {
 }
 
 func MapRoutes(r *gin.Engine) {
+	restClient := resty.New()
+
 	// Repository
-	githubRepo := repository.NewGithubRepository()
+	githubRepo := repository.NewGithubRepository(restClient)
 	filesystemRepo := repository.NewFilesystemRepository()
 
 	// Service

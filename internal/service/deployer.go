@@ -6,7 +6,7 @@ import (
 )
 
 type DeployerService interface {
-	Deploy(body domain.DeployBody)
+	Deploy(body domain.DeployBody) error
 }
 
 type deployerService struct {
@@ -21,13 +21,25 @@ func NewDeployerService(ghr repository.GithubRepository, fsr repository.Filesyst
 	}
 }
 
-func (s *deployerService) Deploy(body domain.DeployBody) {
+func (s *deployerService) Deploy(body domain.DeployBody) error {
 	// Download binary from Github
-	s.ghRepo.DownloadAsset(body.Repo, body.Tag)
+	release, err := s.ghRepo.GetReleaseByTag(body.Owner, body.Repo, body.Tag)
+	if err != nil {
+		return err
+	}
+
+	for _, asset := range release.Assets {
+		if asset.Name == body.Tag {
+			s.ghRepo.DownloadAsset(body.Owner, body.Repo, body.Tag, asset.Name)
+			break
+		}
+	}
 
 	// Move the asset to the scope folder
 	s.fsRepo.Move(body.Scope)
 
 	// Run the binary
 	s.fsRepo.Run(body.Scope, body.Tag)
+
+	return nil
 }
