@@ -27,7 +27,7 @@ func (c *deployerController) Deploy(ctx *gin.Context) {
 	var body domain.DeployBody
 	err := ctx.ShouldBindJSON(&body)
 
-	if err != nil {
+	if err != nil || !body.IsValid() {
 		ctx.String(http.StatusBadRequest, "Invalid body.")
 		return
 	}

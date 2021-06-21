@@ -6,3 +6,10 @@ type DeployBody struct {
 	Tag   string `json:"tag"`
 	Scope string `json:"scope"`
 }
+
+func (body *DeployBody) IsValid() bool {
+	return body.Owner != "" &&
+		body.Repo != "" &&
+		body.Tag != "" &&
+		body.Scope != ""
+}
