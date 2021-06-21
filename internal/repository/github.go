@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"asimov-deployer-backend/internal/apierror"
 	"asimov-deployer-backend/internal/defines"
 	"asimov-deployer-backend/internal/domain"
 	"encoding/json"
@@ -13,8 +14,8 @@ import (
 )
 
 type GithubRepository interface {
-	DownloadAsset(owner string, repo string, assetID uint64, filename string, path string) error
-	GetReleaseByTag(owner string, repo string, tag string) (*domain.GithubGetReleaseByTagResponse, error)
+	DownloadAsset(owner string, repo string, assetID uint64, filename string, path string, githubToken string) *apierror.ApiError
+	GetReleaseByTag(owner string, repo string, tag string, githubToken string) (*domain.GithubGetReleaseByTagResponse, *apierror.ApiError)
 }
 
 type githubRepository struct {
@@ -27,50 +28,58 @@ func NewGithubRepository(rc *resty.Client) GithubRepository {
 	}
 }
 
-func (r *githubRepository) GetReleaseByTag(owner string, repo string, tag string) (*domain.GithubGetReleaseByTagResponse, error) {
+func (r *githubRepository) GetReleaseByTag(owner string, repo string, tag string, githubToken string) (*domain.GithubGetReleaseByTagResponse, *apierror.ApiError) {
 	resp, err := r.rc.R().
-		SetHeader("Authorization", "bearer "+defines.GithubToken).
-		SetHeader("Accept", "application/vnd.github.v3+json").
+		SetHeader("Accept", defines.GithubHeaderAccept).
+		SetHeader("Authorization", "bearer "+githubToken).
 		SetPathParam(defines.GithubPathParamOwner, owner).
 		SetPathParam(defines.GithubPathParamRepository, repo).
 		SetPathParam(defines.GithubPathParamTag, tag).
 		Get(defines.GithubURLGetReleaseByTag)
 
 	if err != nil {
-		return nil, err
+		return nil, apierror.New(http.StatusInternalServerError, err.Error())
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return nil, apierror.New(resp.StatusCode(), string(resp.Body()))
 	}
 
 	var githubGetReleaseByTagResponse domain.GithubGetReleaseByTagResponse
 	err = json.Unmarshal(resp.Body(), &githubGetReleaseByTagResponse)
 
 	if err != nil {
-		return nil, err
+		return nil, apierror.New(http.StatusInternalServerError, "failed to unmarshal GetReleaseByTag")
 	}
 
 	return &githubGetReleaseByTagResponse, nil
 }
 
-func (r *githubRepository) DownloadAsset(owner string, repo string, assetID uint64, filename string, path string) error {
+func (r *githubRepository) DownloadAsset(owner string, repo string, assetID uint64, filename string, path string, githubToken string) *apierror.ApiError {
 	// Descarga la el binario de la nueva versión
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/repos/%s/%s/releases/assets/%d", defines.GithubURLBase, owner, repo, assetID), nil)
+	if err != nil {
+		return apierror.New(http.StatusInternalServerError, err.Error())
+	}
 	req.Header.Set("Accept", "application/octet-stream")
-	req.Header.Set("Authorization", "bearer "+defines.GithubToken)
+	req.Header.Set("Authorization", "bearer "+githubToken)
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return apierror.New(http.StatusInternalServerError, err.Error())
 	}
 	defer resp.Body.Close()
 
 	// Crea el archivo
 	out, err := os.Create(path + "/" + filename)
 	if err != nil {
-		return err
+		return apierror.New(http.StatusInternalServerError, err.Error())
 	}
 	defer out.Close()
 
 	// Escribe en el archivo
 	_, err = io.Copy(out, resp.Body)
-
-	return err
+	if err != nil {
+		return apierror.New(http.StatusInternalServerError, err.Error())
+	}
+	return nil
 }

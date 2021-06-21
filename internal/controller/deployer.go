@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"asimov-deployer-backend/internal/defines"
 	"asimov-deployer-backend/internal/domain"
 	"asimov-deployer-backend/internal/service"
 	"net/http"
@@ -31,12 +32,19 @@ func (c *deployerController) Deploy(ctx *gin.Context) {
 		return
 	}
 
-	err = c.svc.Deploy(body)
+	githubToken := ctx.Request.Header.Get(defines.HeaderGithubToken)
 
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+	if githubToken == "" {
+		ctx.String(http.StatusBadRequest, "Missing token.")
 		return
 	}
 
-	ctx.String(http.StatusOK, "Deployed correctly.")
+	apiErr := c.svc.Deploy(&body, &githubToken)
+
+	if apiErr != nil {
+		ctx.AbortWithStatusJSON(apiErr.Status, apiErr.Message)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "deployed correctly"})
 }

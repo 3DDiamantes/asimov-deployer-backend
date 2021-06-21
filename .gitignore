@@ -17,3 +17,6 @@
 # VSCode
 .vscode/
 __debug_bin
+
+# Idea
+.idea/
