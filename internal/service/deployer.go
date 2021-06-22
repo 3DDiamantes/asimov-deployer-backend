@@ -67,7 +67,7 @@ func (s *deployerService) Deploy(body *domain.DeployBody, githubToken *string) *
 	}
 
 	// Run the binary
-	s.fsRepo.Run(body.Scope)
+	apiErr = s.fsRepo.Run(binPath)
 
 	return nil
 }

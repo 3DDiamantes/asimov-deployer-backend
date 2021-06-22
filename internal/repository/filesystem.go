@@ -9,7 +9,7 @@ import (
 
 type FilesystemRepository interface {
 	Move(fromPath string, toPath string) *apierror.ApiError
-	Run(path string)
+	Run(path string) *apierror.ApiError
 }
 
 type filesystemRepository struct {
@@ -32,6 +32,6 @@ func (r *filesystemRepository) Move(fromPath string, toPath string) *apierror.Ap
 
 	return nil
 }
-func (r *filesystemRepository) Run(path string) {
-
+func (r *filesystemRepository) Run(path string) *apierror.ApiError{
+	return nil
 }

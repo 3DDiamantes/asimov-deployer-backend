@@ -10,5 +10,6 @@ const (
 	GithubURLGetReleaseAsset = GithubURLBase + "/repos/{" + GithubPathParamOwner + "}/{" + GithubPathParamRepository + "}/releases/assets/{" + GithubPathParamAssetID + "}"
 	GithubURLGetReleaseByTag = GithubURLBase + "/repos/{" + GithubPathParamOwner + "}/{" + GithubPathParamRepository + "}/releases/tags/{" + GithubPathParamTag + "}"
 
-	GithubHeaderAccept = "application/vnd.github.v3+json"
+	GithubHeaderAcceptJSON = "application/vnd.github.v3+json"
+	GithubHeaderAcceptOctetStream = "application/octet-stream"
 )
