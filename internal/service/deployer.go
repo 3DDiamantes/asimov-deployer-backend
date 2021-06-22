@@ -2,10 +2,12 @@ package service
 
 import (
 	"asimov-deployer-backend/internal/apierror"
+	"asimov-deployer-backend/internal/defines"
 	"asimov-deployer-backend/internal/domain"
 	"asimov-deployer-backend/internal/repository"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 type DeployerService interface {
@@ -48,13 +50,15 @@ func (s *deployerService) Deploy(body *domain.DeployBody, githubToken *string) *
 		return apierror.New(http.StatusInternalServerError, err.Error())
 	}
 
-	apiErr = s.ghRepo.DownloadAsset(body.Owner, body.Repo, asset.ID, asset.Name, tmpDir, *githubToken)
+	downloadPath := filepath.Join(tmpDir, body.Scope)
+	apiErr = s.ghRepo.DownloadAsset(body.Owner, body.Repo, asset.ID, downloadPath, *githubToken)
 	if apiErr != nil {
 		return apiErr
 	}
 
-	// Move the binary to the scope folder
-	s.fsRepo.Move(tmpDir, body.Tag, body.Scope)
+	// Move the binary and name it as scope
+	binPath := filepath.Join(defines.BinariesRoot, body.Repo, body.Scope)
+	s.fsRepo.Move(downloadPath, binPath)
 
 	// Delete the temp folder
 	err = os.RemoveAll(tmpDir)
@@ -63,7 +67,7 @@ func (s *deployerService) Deploy(body *domain.DeployBody, githubToken *string) *
 	}
 
 	// Run the binary
-	s.fsRepo.Run(body.Scope, body.Tag)
+	s.fsRepo.Run(body.Scope)
 
 	return nil
 }

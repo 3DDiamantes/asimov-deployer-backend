@@ -14,7 +14,7 @@ import (
 )
 
 type GithubRepository interface {
-	DownloadAsset(owner string, repo string, assetID uint64, filename string, path string, githubToken string) *apierror.ApiError
+	DownloadAsset(owner string, repo string, assetID uint64, targetFile string, githubToken string) *apierror.ApiError
 	GetReleaseByTag(owner string, repo string, tag string, githubToken string) (*domain.GithubGetReleaseByTagResponse, *apierror.ApiError)
 }
 
@@ -54,7 +54,7 @@ func (r *githubRepository) GetReleaseByTag(owner string, repo string, tag string
 	return &githubGetReleaseByTagResponse, nil
 }
 
-func (r *githubRepository) DownloadAsset(owner string, repo string, assetID uint64, filename string, path string, githubToken string) *apierror.ApiError {
+func (r *githubRepository) DownloadAsset(owner string, repo string, assetID uint64, targetFile string, githubToken string) *apierror.ApiError {
 	// Descarga la el binario de la nueva versión
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/repos/%s/%s/releases/assets/%d", defines.GithubURLBase, owner, repo, assetID), nil)
 	if err != nil {
@@ -70,7 +70,7 @@ func (r *githubRepository) DownloadAsset(owner string, repo string, assetID uint
 	defer resp.Body.Close()
 
 	// Crea el archivo
-	out, err := os.Create(path + "/" + filename)
+	out, err := os.Create(targetFile)
 	if err != nil {
 		return apierror.New(http.StatusInternalServerError, err.Error())
 	}
