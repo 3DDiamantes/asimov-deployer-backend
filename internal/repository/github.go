@@ -14,6 +14,11 @@ import (
 	"strconv"
 )
 
+var (
+	errUnmarshalGetReleaseByTag = apierror.New(http.StatusInternalServerError, "failed to unmarshal GetReleaseByTag")
+	errUnmarshalGetAssetByID = apierror.New(http.StatusInternalServerError, "failed to unmarshal GetAssetByID")
+)
+
 type GithubRepository interface {
 	DownloadAsset(owner string, repo string, assetID uint64, targetFile string, githubToken string) *apierror.ApiError
 	GetReleaseByTag(owner string, repo string, tag string, githubToken string) (*domain.GithubGetReleaseByTagResponse, *apierror.ApiError)
@@ -50,7 +55,7 @@ func (r *githubRepository) GetReleaseByTag(owner string, repo string, tag string
 	err = json.Unmarshal(resp.Body(), &githubGetReleaseByTagResponse)
 
 	if err != nil {
-		return nil, apierror.New(http.StatusInternalServerError, "failed to unmarshal GetReleaseByTag")
+		return nil, errUnmarshalGetReleaseByTag
 	}
 
 	return &githubGetReleaseByTagResponse, nil

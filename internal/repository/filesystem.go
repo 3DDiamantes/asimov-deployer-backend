@@ -10,6 +10,8 @@ import (
 type FilesystemRepository interface {
 	Move(fromPath string, toPath string) *apierror.ApiError
 	Run(path string) *apierror.ApiError
+	CreateTempDir() (string, *apierror.ApiError)
+	DeleteDir(path string) *apierror.ApiError
 }
 
 type filesystemRepository struct {
@@ -33,5 +35,18 @@ func (r *filesystemRepository) Move(fromPath string, toPath string) *apierror.Ap
 	return nil
 }
 func (r *filesystemRepository) Run(path string) *apierror.ApiError{
+	return nil
+}
+func (r *filesystemRepository) CreateTempDir() (string, *apierror.ApiError) {
+	path, err := os.MkdirTemp("", "asimov-deployer-*")
+	if err != nil {
+		return "", apierror.New(http.StatusInternalServerError, err.Error())
+	}
+	return path, nil
+}
+func (r *filesystemRepository) DeleteDir(path string) *apierror.ApiError {
+	if err := os.RemoveAll(path); err != nil {
+		return apierror.New(http.StatusInternalServerError, err.Error())
+	}
 	return nil
 }
