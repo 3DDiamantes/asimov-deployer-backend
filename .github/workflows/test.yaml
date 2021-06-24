@@ -1,8 +1,22 @@
-name: Test
+name: Build and test
 
 on:
-  [push, pull_request]
+  push:
+  pull_request:
+    types: [ opened ]
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Build
+        run: go build -v ./...
   test:
     runs-on: ubuntu-latest
     steps:

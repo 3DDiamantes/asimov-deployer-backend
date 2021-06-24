@@ -1,7 +1,9 @@
 name: Coverage
 
 on:
-  [push, pull_request]
+  push:
+  pull_request:
+    types: [opened]
 
 jobs:
   build:
@@ -24,4 +26,4 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: "lcov.info"
-          min_coverage: 50
+          min_coverage: 0
