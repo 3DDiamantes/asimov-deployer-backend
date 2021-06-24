@@ -1,9 +1,9 @@
-name: Test
+name: Build
 
 on:
   [push, pull_request]
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -13,5 +13,5 @@ jobs:
         with:
           go-version: 1.16
 
-      - name: Test
-        run: go test -v ./...
+      - name: Build
+        run: go build -v ./...
