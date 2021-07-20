@@ -1,6 +1,6 @@
 package defines
 
 const (
-	HeaderGithubToken = "github-token"
+	HeaderGithubToken = "Github-Token"
 )
 
