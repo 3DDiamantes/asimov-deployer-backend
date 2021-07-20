@@ -5,27 +5,69 @@ on:
   pull_request:
     types: [ opened ]
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Run linters
+        uses: golangci/golangci-lint-actions@v2
+        with:
+          version: v1.29
+
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
 
-      - name: Build
+      - name: Run build
         run: go build -v ./...
+
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
 
-      - name: Test
-        run: go test -v ./...
+      - name: Run tests
+        run: go test -v -covermode=count ./...
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Calculate coverage
+        run: go test -v -covermode=count -coverprofile=coverage.out ./...
+
+      - name: Convert coverage.out to coverage.lcov
+        uses: jandelgado/gcov2lcov-action@v1.0.8
+
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@1.1.3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage.lcov
