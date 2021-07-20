@@ -3,25 +3,17 @@ package apierror
 import "fmt"
 
 type ApiError struct {
-	status int `json:"status"`
-	message string `json:"message"`
+	Status int
+	Message string
 }
 
 func (ae *ApiError) Error() string {
-	return fmt.Sprintf("Status: %d Message: %s", ae.status, ae.message)
-}
-
-func (ae *ApiError) Status() int {
-	return ae.status
-}
-
-func (ae *ApiError) Message() string {
-	return ae.message
+	return fmt.Sprintf("Status: %d Message: %s", ae.Status, ae.Message)
 }
 
 func New(s int, m string) *ApiError {
 	return &ApiError{
-		status:  s,
-		message: m,
+		Status:  s,
+		Message: m,
 	}
 }

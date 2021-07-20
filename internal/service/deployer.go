@@ -64,7 +64,10 @@ func (s *deployerService) Deploy(body *domain.DeployBody, githubToken *string) *
 
 	// Move the binary and name it as scope
 	binPath := filepath.Join(defines.BinariesRoot, body.Repo, body.Scope)
-	s.fsRepo.Move(downloadPath, binPath)
+	apiErr = s.fsRepo.Move(downloadPath, binPath)
+	if apiErr != nil {
+		return apiErr
+	}
 
 	// Delete the temp folder
 	apiErr = s.fsRepo.DeleteDir(tmpDir)
@@ -75,5 +78,5 @@ func (s *deployerService) Deploy(body *domain.DeployBody, githubToken *string) *
 	// Run the binary
 	apiErr = s.fsRepo.Run(binPath)
 
-	return nil
+	return apiErr
 }

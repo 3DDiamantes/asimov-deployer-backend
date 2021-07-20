@@ -34,21 +34,22 @@ func (c *deployerController) Deploy(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&body)
 
 	if err != nil || !body.IsValid() {
-		ctx.AbortWithError(errInvalidBody.Status(), errInvalidBody)
+		ctx.AbortWithError(errInvalidBody.Status, errInvalidBody)
+
 		return
 	}
 
 	githubToken := ctx.Request.Header.Get(defines.HeaderGithubToken)
 
 	if githubToken == "" {
-		ctx.AbortWithError(errMissingToken.Status(), errMissingToken)
+		ctx.AbortWithError(errMissingToken.Status, errMissingToken)
 		return
 	}
 
 	apiErr := c.svc.Deploy(&body, &githubToken)
 
 	if apiErr != nil {
-		ctx.AbortWithError(apiErr.Status(), apiErr)
+		ctx.AbortWithError(apiErr.Status, apiErr)
 		return
 	}
 

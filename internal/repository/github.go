@@ -117,7 +117,7 @@ func (r *githubRepository) GetAssetByID(owner string, repo string, assetID uint6
 	err = json.Unmarshal(resp.Body(), &asset)
 
 	if err != nil {
-		return nil, apierror.New(http.StatusInternalServerError, "failed to unmarshal GetAssetByID")
+		return nil, errUnmarshalGetAssetByID
 	}
 
 	return &asset, nil
